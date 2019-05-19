@@ -5,7 +5,7 @@ services:
     image: mdillon/postgis:9.6
     restart: always
     ports:
-      - "5555:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: engineTest888
@@ -13,5 +13,13 @@ services:
     volumes:
       - ./init-db/:/docker-entrypoint-initdb.d/
       - pg-data:/var/lib/postgresql/data
+  restservice:
+    image: jshiv/zestyai-engineering-test:latest
+    environment:
+      POSTGRES_HOST: postgres
+    ports:
+      - "8080:8000"
+    links:
+      - postgres
 volumes:
   pg-data:
