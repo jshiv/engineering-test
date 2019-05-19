@@ -1,0 +1,40 @@
+from flask import Flask, render_template, request, url_for 
+from flask_restful import reqparse, abort, Api, Resource
+import lib
+import os
+import json
+
+
+IMAGE_FOLDER = os.path.join('static', 'images')
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = IMAGE_FOLDER
+api = Api(app)
+
+
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
+api.add_resource(HelloWorld, '/')
+
+class Find(Resource):
+    def post(self, distance):
+        geojson = request.get_json(force=True)
+        return lib.get_ids_within_distance(geojson, distance)
+api.add_resource(Find, '/find/<int:distance>')
+
+class Statistics(Resource):
+    def get(self, id, distance):
+        return lib.get_geo_stats(id_list=[id], distance=distance)
+api.add_resource(Statistics, '/stats/<string:id>/<int:distance>')
+
+@app.route('/images')
+@app.route('/index')
+def show_index():
+    full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'redkitten.jpg')#'f853874999424ad2a5b6f37af6b56610.tiff')
+    print(full_filename)
+    return render_template("index.html", user_image = full_filename)
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
+
