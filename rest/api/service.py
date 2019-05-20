@@ -31,10 +31,13 @@ class Statistics(Resource):
         return lib.get_geo_stats(id_list=[id], distance=distance)
 api.add_resource(Statistics, '/stats/<string:id>/<int:distance>')
 
-@app.route('/images')
+@app.route('/<id>')
 @app.route('/index')
-def show_index():
-    full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'redkitten.jpg')#'f853874999424ad2a5b6f37af6b56610.tiff')
+def show_index(id):
+    full_filename = os.path.join(IMAGE_FOLDER, id+'.jpeg')
+    if not os.path.isfile(full_filename):
+        lib.download_image(id, IMAGE_FOLDER)
+    
     print(full_filename)
     return render_template("index.html", user_image = full_filename)
 

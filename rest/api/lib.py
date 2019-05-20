@@ -5,6 +5,10 @@ import config
 from functools import lru_cache
 import requests
 import shutil
+import tempfile
+from PIL import Image
+import os
+
 
 @lru_cache(maxsize=128)
 def get_image_url(id_str):
@@ -21,12 +25,19 @@ def get_ids():
     return id_list
 
 @lru_cache(maxsize=128)
-def download_image(image_url, path = './images/file.image'):
+def download_image(id_str, writepath = './images/'):
+    image_url = get_image_url(id_str)
     r = requests.get(image_url, stream=True)
     if r.status_code == 200:
-        with open(path, 'wb') as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)   
+        with tempfile.NamedTemporaryFile() as tmp:
+            # Write tif file to tmp dir.
+            with open(tmp.name, 'wb') as f:
+                r.raw.decode_content = True
+                shutil.copyfileobj(r.raw, f)
+            # Convert tmp tif file to jpeg.
+            im = Image.open(tmp.name)
+            im.thumbnail(im.size)
+            im.save(os.path.join(writepath,id_str+'.jpeg'), "JPEG", quality=100)
 
 @lru_cache(maxsize=128)
 def get_ids_within_distance(geojson, distance):
@@ -64,9 +75,7 @@ def get_geo_stats(id_list, distance):
 if __name__=='__main__':
     print(get_ids())
     print(get_image_url('f853874999424ad2a5b6f37af6b56610'))
-    # download_image(
-    #     image_url = 'https://storage.googleapis.com/engineering-test/images/f853874999424ad2a5b6f37af6b56610.tif',
-    #     path = './images/f853874999424ad2a5b6f37af6b56610')
+    download_image('f853874999424ad2a5b6f37af6b56610', './static/images/')
     print(get_ids_within_distance('{"type": "Point", "coordinates": [-73.748751, 40.9185483]}', 100))
     print(get_geo_stats(id_list = ['f1650f2a99824f349643ad234abff6a2','f853874999424ad2a5b6f37af6b56610'],
                         distance = 100))
