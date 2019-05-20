@@ -10,11 +10,15 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = IMAGE_FOLDER
 api = Api(app)
 
-
 class HelloWorld(Resource):
     def get(self):
-        return {'hello': 'world'}
+        return {'Hello':'World'}
 api.add_resource(HelloWorld, '/')
+
+class GeoIds(Resource):
+    def get(self):
+        return lib.get_ids()
+api.add_resource(GeoIds, '/id')
 
 class Find(Resource):
     def post(self, distance):
