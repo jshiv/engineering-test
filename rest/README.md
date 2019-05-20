@@ -10,3 +10,10 @@ docker build -t jshiv/zestyai-engineering-test:latest .
 ```bash
 docker run -it jshiv/zestyai-engineering-test bash
 ```
+
+## Run tests
+```bash
+pip install pytest --user
+cd engineering-test/rest/
+pytest -v
+```
